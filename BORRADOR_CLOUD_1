@@ -1,0 +1,24 @@
+const { PubSub } = require('@google-cloud/pubsub');
+const pubsub = new PubSub();
+
+exports.procesarFactura = async (req, res) => {
+    try {
+        const factura = req.body.factura;
+
+        if (!factura || !factura.id || !factura.cliente || !factura.metodoPago) {
+            res.status(400).send('Solicitud incorrecta');
+            return;
+        }
+
+        // Aquí procesaríamos la factura, por ejemplo, publicándola en un topic de Pub/Sub
+        const topicName = 'facturas';
+        const dataBuffer = Buffer.from(JSON.stringify(factura));
+
+        await pubsub.topic(topicName).publish(dataBuffer);
+
+        res.status(200).send('Factura procesada exitosamente');
+    } catch (error) {
+        console.error('Error procesando la factura:', error);
+        res.status(500).send('Error procesando la factura');
+    }
+};
